@@ -1,4 +1,11 @@
 from ObjetClientTarget import Client
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-p", "--print_target", action="store_true", help="Show on Target's screen what are doing")
+parser.add_argument("-i", "--ip_target", default="127.0.0.1", type=str,
+                    help="define de target's ip, Default is 127.0.0.1 (localhost)")
+args = parser.parse_args()
 
 
 def menu():
@@ -32,7 +39,9 @@ def menu_getinfo():
         client.getinfo("getinfo_network")
 
 
-client = Client()
+client = Client(args.ip_target)
 client.connect_to_server()
+if args.print_target:
+    client.print_target()
 menu()
 client.quit()
