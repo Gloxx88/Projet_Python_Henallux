@@ -1,4 +1,4 @@
-from ObjetClientTarget import Target
+from Objet_Us_Target import Target
 
 
 target = Target()
