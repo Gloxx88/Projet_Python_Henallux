@@ -50,18 +50,6 @@ def menu_getinfo():
         client.getinfo("net user")
 
 
-def menu_print_on_target():
-    print("\t\t============\n\t\t\tMENU\n\tPrint on Target Screen\n\t\t============")
-    print("1. Print on Target screen")
-    print("2. I DON'T want to")
-    print("3. Don't change and go back")
-    choice = input(">")
-
-    if choice == "1":
-        client.print_target(True)
-    if choice == "2":
-        client.print_target(False)
-
 def menu_settings():
     print("\t\t============\n\t\t\tMENU\n\tSettings\n\t\t============")
     print("Settings: ")
@@ -73,14 +61,34 @@ def menu_settings():
     if choice == "1":
         menu_print_on_target()
     if choice == "2":
-        size_buffer = args.buffer_size + 1
-        while size_buffer != 2048 or 4096 or 8192 or 16384:
-            size_buffer = input("which size would you want [2048, 4096, 8192, 16384]")
-            if size_buffer == 2048 or 4096 or 8192 or 16384:
-                client.set_target_buffer(size_buffer)
-            else:
-                print("Select a correct size please")
-                TO DO
+        print("which size would you want: ")
+        print("1. 2048\n2. 4096\n3. 8192\n4. 16384\n5. quit")
+        size_buffer = input("> ")
+        if size_buffer == "1":
+            client.buffer = 2048
+            client.set_target_buffer(2048)
+        if size_buffer == "2":
+            client.buffer = 4096
+            client.set_target_buffer(4096)
+        if size_buffer == "3":
+            client.buffer = 8192
+            client.set_target_buffer(8192)
+        if size_buffer == "4":
+            client.buffer = 16384
+            client.set_target_buffer(16384)
+
+
+def menu_print_on_target():
+    print("\t\t============\n\t\t\tMENU\n\tPrint on Target Screen\n\t\t============")
+    print("1. Print on Target screen")
+    print("2. I DON'T want to")
+    print("3. Don't change and go back")
+    choice = input(">")
+
+    if choice == "1":
+        client.print_target(True)
+    if choice == "2":
+        client.print_target(False)
 
 
 client = Client(args.ip_target)
