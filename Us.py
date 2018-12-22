@@ -119,5 +119,3 @@ try:
 except ConnectionRefusedError as msg:
     print("Error: " + str(msg))
     print("The programme on target is not running.")
-
-

@@ -42,18 +42,26 @@ class Client(Machine):
                     break
 
     def quit(self):
-        self.s.send(str.encode("quit"))
-        response_target = self.s.recv(self.buffer)
-        print(response_target.decode("utf-8"))
+        try:
+            self.s.send(str.encode("quit"))
+            response_target = self.s.recv(self.buffer)
+            print(response_target.decode("utf-8"))
+        except ConnectionResetError:
+            print("the target is already closed")
         super().quit()
 
     def getinfo(self, info):
-        self.s.send(str.encode(str(info)))
-        info = self.s.recv(self.buffer)
-        print(info.decode("utf-8"))
-        info = self.s.recv(self.buffer)
-        print(info.decode("utf-8"))
-        input("\n\nPress ENTER")
+        try:
+            self.s.send(str.encode(str(info)))
+            info = self.s.recv(self.buffer)
+            print(info.decode("utf-8"))
+            info = self.s.recv(self.buffer)
+            print(info.decode("utf-8"))
+            input("\n\nPress ENTER")
+        except ConnectionResetError as msg:
+            print("An existing connection had to be closed by the target. \nError: " + str(msg))
+            print("this programme is shutting down...")
+            self.quit()
 
     def print_target(self, print_bool):
         if print_bool:
