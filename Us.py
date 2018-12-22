@@ -1,20 +1,25 @@
 from ObjetClientTarget import Client
 import argparse
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--print_target", action="store_true", help="Show on Target's screen what are doing")
-parser.add_argument("-i", "--ip_target", default="127.0.0.1", type=str,
+parser.add_argument("-ip", "--ip_target", default="127.0.0.1", type=str,
                     help="define de target's ip, Default is 127.0.0.1 (localhost)")
+parser.add_argument("-s", "--shell", action="store_true", help="Skip main menu and go directly to the Shell prompt")
+parser.add_argument("-i", "--get_info", action="store_true", help="Skip main menu and go directly to the \"get info\" "
+                                                                  "menu")
 args = parser.parse_args()
 
 
 def menu():
     while True:
-        print("\t \t ============ \n \t \t \t MENU\n \t \t ============")
+        print("\t\t============\n\t\t\tMENU\n\t\t============")
         print("welcome, what's your choice?")
         print("1. Reverse Shell \n"
               "2. Get info \n"
-              "3. Quit \n")
+              "3. Print on Target screen\n"
+              "4. Quit \n")
         choice = input("> ")
 
         if choice == "1":
@@ -22,11 +27,13 @@ def menu():
         if choice == "2":
             menu_getinfo()
         if choice == "3":
+            menu_print_on_target()
+        if choice == "4":
             break
 
 
 def menu_getinfo():
-    print("\t \t ============ \n \t \t \t MENU -- Get Info\n \t \t ============")
+    print("\t\t============\n\t\t\tMENU\n\t\tGet Info\n\t\t============")
     print("1. Global information")
     print("2. Network information")
     print("3. Quit")
@@ -39,9 +46,26 @@ def menu_getinfo():
         client.getinfo("getinfo_network")
 
 
+def menu_print_on_target():
+    print("\t\t============\n\t\t\tMENU\n\tPrint on Target Screen\n\t\t============")
+    print("1. Print on Target screen")
+    print("2. I DON'T want to")
+    print("3. Don't change and go back")
+    choice = input(">")
+
+    if choice == "1":
+        client.print_target(True)
+    if choice == "2":
+        client.print_target(False)
+
+
 client = Client(args.ip_target)
 client.connect_to_server()
 if args.print_target:
-    client.print_target()
+    client.print_target(True)
+if args.shell:
+    client.reverse_shell_send_command()
+if args.get_info:
+    menu_getinfo()
 menu()
 client.quit()
