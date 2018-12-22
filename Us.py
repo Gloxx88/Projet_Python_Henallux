@@ -61,21 +61,7 @@ def menu_settings():
     if choice == "1":
         menu_print_on_target()
     if choice == "2":
-        print("which size would you want: ")
-        print("1. 2048\n2. 4096\n3. 8192\n4. 16384\n5. quit")
-        size_buffer = input("> ")
-        if size_buffer == "1":
-            client.buffer = 2048
-            client.set_target_buffer(2048)
-        if size_buffer == "2":
-            client.buffer = 4096
-            client.set_target_buffer(4096)
-        if size_buffer == "3":
-            client.buffer = 8192
-            client.set_target_buffer(8192)
-        if size_buffer == "4":
-            client.buffer = 16384
-            client.set_target_buffer(16384)
+        menu_buffer()
 
 
 def menu_print_on_target():
@@ -89,6 +75,32 @@ def menu_print_on_target():
         client.print_target(True)
     if choice == "2":
         client.print_target(False)
+
+
+def menu_buffer():
+    print("which size would you want: ")
+    print("1. 2048\n2. 4096\n3. 8192\n4. 16384\n5. What's buffer size ?\n6. quit")
+    size_buffer = input("> ")
+    if size_buffer == "1":
+        client.buffer = 2048
+        client.set_target_buffer(2048)
+    if size_buffer == "2":
+        client.buffer = 4096
+        client.set_target_buffer(4096)
+    if size_buffer == "3":
+        client.buffer = 8192
+        client.set_target_buffer(8192)
+    if size_buffer == "4":
+        client.buffer = 16384
+        client.set_target_buffer(16384)
+    if size_buffer == "5":
+        print("EN: In computing, a data buffer (or simply a buffer) is a region of a physical memory used to "
+              "temporarily store data while it is being processed as when moved from one location to another.")
+        print("FR: En informatique, un tampon de données (ou tout simplement un tampon) est une région d’une mémoire "
+              "physique utilisée pour stocker temporairement des données le temps qu'elles soient traitées comme "
+              "lorsqu’elles sont déplacées d’un endroit à un autre.")
+        print("\nSource: https://en.wikipedia.org/wiki/Data_buffer\n")
+        menu_buffer()
 
 
 client = Client(args.ip_target)

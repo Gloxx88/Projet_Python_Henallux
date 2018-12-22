@@ -64,6 +64,7 @@ class Client(Machine):
     def set_target_buffer(self, size):
         self.s.send(str.encode("buffer_size"))
         self.s.send(str.encode(str(size)))
+        print("Buffer size: " + str(self.buffer))
 
 
 # Target is the server
@@ -116,11 +117,7 @@ class Target(Machine):
             elif instruction == "ipconfig" or instruction == "net user":
                 self.getinfo_target_cmd(instruction)
             elif instruction == "buffer_size":
-                self.buffer = int(self.s.recv(self.buffer))
-                if self.print:
-                    print("the buffer size is %d now", self.buffer)
-                    print(self.buffer)
-                    print(type(self.buffer))
+                self.change_buffer_size()
 
     def reverse_shell_target(self):
         while True:
@@ -173,6 +170,11 @@ class Target(Machine):
         if self.print:
             print(command)
             print(output_str)
+
+    def change_buffer_size(self):
+        self.buffer = int(self.s.recv(self.buffer))
+        if self.print:
+            print("the buffer size is", self.buffer)
 
     # close de connection and the socket
     def quit(self):
