@@ -107,7 +107,6 @@ client = Client(args.ip_target)
 client.buffer = args.buffer_size
 try:
     client.connect_to_server()
-
     if args.print_target:
         client.print_target(True)
     if args.shell:

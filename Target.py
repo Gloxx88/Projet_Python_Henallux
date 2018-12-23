@@ -8,5 +8,6 @@ try:
     target.what_to_do()
 except ConnectionResetError as msg:
     if target.print:
-        print("")
-        #TODO try
+        print("The connection has been stopped")
+        print("Error : " + str(msg))
+    target.quit()
