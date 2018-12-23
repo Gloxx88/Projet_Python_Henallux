@@ -16,7 +16,7 @@ args = parser.parse_args()
 
 
 def menu():
-    while type(client.s) is socket.socket:
+    while client.connection_active:
         print("\t\t============\n\t\t\tMENU\n\t\t============")
         print("welcome, what's your choice?")
         print("1. Reverse Shell \n"
