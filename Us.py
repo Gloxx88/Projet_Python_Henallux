@@ -1,7 +1,5 @@
 from Objet_Us_Target import Client
 import argparse
-import socket
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--print_target", action="store_true", help="Show on Target's screen what are doing")
@@ -115,7 +113,8 @@ try:
     if args.get_info:
         menu_getinfo()
     menu()
-    client.quit()
+    if client.connection_active:
+        client.quit()
 except ConnectionRefusedError as msg:
     print("Error: " + str(msg))
     print("The programme on target is not running.")
