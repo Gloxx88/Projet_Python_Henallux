@@ -1,5 +1,6 @@
 from Objet_Us_Target import Client
 import argparse
+import socket
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--print_target", action="store_true", help="Show on Target's screen what are doing")
@@ -23,13 +24,13 @@ def menu():
               "4. Quit \n")
         choice = input("> ")
 
-        if choice == "1":
+        if choice == "1" or choice == "shell" or choice == "Shell":
             client.reverse_shell_send_command()
-        if choice == "2":
+        if choice == "2" or choice == "get info" or choice == "Get info":
             menu_getinfo()
-        if choice == "3":
+        if choice == "3" or choice == "settings" or choice == "Settings":
             menu_settings()
-        if choice == "4":
+        if choice == "4" or choice == "quit" or choice == "Quit":
             break
 
 
@@ -102,7 +103,28 @@ def menu_buffer():
         menu_buffer()
 
 
-client = Client(args.ip_target)
+def check_ip():
+    print("The actual ip we are going to try is " + args.ip_target)
+    print("\t1. This is fine")
+    print("\t2. Let's change this")
+    choice = input("> ")
+    if choice == "1":
+        return args.ip_target
+    if choice == "2":
+        print("Which ip would you like ? (ex: 192.168.1.1) : ", end="")
+        new_ip = input("> ")
+        try:
+            # legal
+            socket.inet_aton(new_ip)
+        except OSError:
+            # if wrong ip ask again
+            print("Format need to be X.X.X.X")
+            check_ip()
+        return new_ip
+
+
+ip = check_ip()
+client = Client(ip)
 client.buffer = args.buffer_size
 try:
     client.connect_to_server()
@@ -118,3 +140,10 @@ try:
 except ConnectionRefusedError as msg:
     print("Error: " + str(msg))
     print("The programme on target is not running.")
+except socket.gaierror as msg:
+    print("the ip address is invalid mais ici c'est meiux")
+    print("Error " + str(msg))
+except TimeoutError as msg:
+    print("the ip address is iezf ea nvalid mais ici c'est meiux")
+    print("Error " + str(msg))
+
