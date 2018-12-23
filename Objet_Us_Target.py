@@ -210,7 +210,7 @@ class Target(Machine):
         except socket.error as msg:
             if self.print:
                 print("the socket fail to close : " + str(msg))
-        except ConnectionResetError as msg:
+        except ConnectionResetError:
             if self.print:
                 print("The connection has already been stopped")
             super().quit()

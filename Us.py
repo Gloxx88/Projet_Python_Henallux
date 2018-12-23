@@ -113,7 +113,8 @@ try:
     if args.get_info:
         menu_getinfo()
     menu()
-    client.quit()
+    if client.connection_active:
+        client.quit()
 except ConnectionRefusedError as msg:
     print("Error: " + str(msg))
     print("The programme on target is not running.")
