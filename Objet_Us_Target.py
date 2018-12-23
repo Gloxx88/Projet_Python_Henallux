@@ -43,6 +43,9 @@ class Client(Machine):
                         break
         except ConnectionResetError:
             self.quit()
+        except OSError as msg:
+            print("s n'est plus un socket")
+
 
     def getinfo(self, info):
         try:
