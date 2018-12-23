@@ -1,7 +1,5 @@
 from Objet_Us_Target import Client
 import argparse
-import socket
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--print_target", action="store_true", help="Show on Target's screen what are doing")
