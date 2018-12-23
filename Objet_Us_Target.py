@@ -74,7 +74,7 @@ class Client(Machine):
             self.s.send(str.encode("quit"))
             response_target = self.s.recv(self.buffer)
             print(response_target.decode("utf-8"))
-        except ConnectionResetError:
+        except ConnectionResetError as msg:
             print("We notice that the connection is closed.. \nError: " + str(msg))
         super().quit()
 
@@ -136,7 +136,6 @@ class Target(Machine):
             if self.print:
                 print("Error : " + str(msg))
             self.quit()
-
 
     def reverse_shell_target(self):
         while True:

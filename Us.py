@@ -1,5 +1,6 @@
 from Objet_Us_Target import Client
 import argparse
+import socket
 
 
 parser = argparse.ArgumentParser()
@@ -15,7 +16,7 @@ args = parser.parse_args()
 
 
 def menu():
-    while True:
+    while type(client.s) is socket.socket:
         print("\t\t============\n\t\t\tMENU\n\t\t============")
         print("welcome, what's your choice?")
         print("1. Reverse Shell \n"
