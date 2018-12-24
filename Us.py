@@ -17,11 +17,7 @@ args = parser.parse_args()
 def menu():
     while client.connection_active:
         print("\t\t============\n\t\t\tMENU\n\t\t============")
-        print("welcome, what's your choice?")
-        print("1. Reverse Shell \n"
-              "2. Get info \n"
-              "3. Settings\n"
-              "4. Quit \n")
+        print("Welcome, what's your choice?\n1. Reverse Shell \n2. Get info \n3. Settings\n4. Quit")
         choice = input("> ")
 
         if choice == "1" or choice == "shell" or choice == "Shell":
@@ -35,11 +31,8 @@ def menu():
 
 
 def menu_getinfo():
-    print("\t\t============\n\t\t\tMENU\n\t\tGet Info\n\t\t============")
-    print("1. Global information")
-    print("2. Network information")
-    print("3. list user")
-    print("4. Quit")
+    print("\t\t============\n\t\t\tMENU\n\t\t  Get Info\n\t\t============")
+    print("1. Global information\n2. Network information\n3. list user\n4. Quit")
     choice = input("> ")
 
     if choice == "1":

