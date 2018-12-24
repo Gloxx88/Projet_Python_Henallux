@@ -46,7 +46,7 @@ class Client(Machine):
                 cmd = input("")
                 if len(str.encode(cmd)) > 0:
                     self.s.send(str.encode(cmd, "utf-8"))
-                    client_response = str(self.s.recv(self.buffer), "utf-8")
+                    client_response = str(self.s.recv(self.buffer*4), "utf-8")
                     print(client_response, end="")
                     if cmd == "quit":
                         break
