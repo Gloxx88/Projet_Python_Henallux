@@ -115,9 +115,8 @@ class Target(Machine):
             self.s.bind((self.host, self.port))
             self.s.listen(5)
         except socket.error as msg:
-            print("Socket binding error: " + str(msg) + "\n" + "Do you want to retry ?")
-            if input() == "y" or "yes":
-                self.socket_bind()
+            if self.print:
+                print("Socket binding error: " + str(msg))
 
     # accept the new co
     def socket_accept(self):
