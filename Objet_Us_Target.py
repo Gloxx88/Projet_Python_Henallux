@@ -27,6 +27,7 @@ class Client(Machine):
         self.port = port
         self.connection_active = False  # use to exit the menu loop
 
+    # try to connect to the server
     def connect_to_server(self):
         try:
             self.s.connect((self.host, self.port))
