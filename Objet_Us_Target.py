@@ -13,6 +13,66 @@ class Machine:
             self.s = socket.socket()
         except socket.error as msg:
             print("Socket creation error: " + str(msg))
+# Us
+    def key_generate(self):
+        self.key_rsa = RSA.generate(1024)
+        key_pub = self.key_rsa.publickey()
+        key_b = key_pub.export_key()
+        self.s.send(key_b)
+
+    def recv_key_aes(self):
+        key_aes_enc = self.s.recv(2048)
+        iv_aes_enc = self.s.recv(2048)
+        cipher_rsa = PKCS1_OAEP.new(self.key_rsa)  # Pareil que chiffrement
+        self.key_aes = cipher_rsa.decrypt(key_aes_enc)
+        cipher_rsa = PKCS1_OAEP.new(self.key_rsa)
+        self.iv_aes = cipher_rsa.decrypt(iv_aes_enc)
+
+    def recv_chiff_aes(self):
+        mode_aes = AES.MODE_CFB
+        text_enc = self.s.recv(2048)
+        cipher_aes = AES.new(self.key_aes, mode_aes, iv=self.iv_aes)  # Pareil que RSA
+        text = cipher_aes.decrypt(text_enc)
+        print("le texte reçu est :", text.decode("utf-8"))
+
+    def send_encrypt_msg(self, text_to_encrypt):
+        if type(text_to_encrypt) == str:
+            text_to_encrypt = text_to_encrypt.encode("utf-8")
+        mode_aes = AES.MODE_CFB
+        cipheraes = AES.new(self.key_aes, mode_aes, iv=self.iv_aes)  # Pareil que RSA
+        text_enc = cipheraes.encrypt(text_to_encrypt)
+        print('text en AES', text_enc)
+        self.s.send(text_enc)
+#target    
+        def recv_key_rsa(self):
+        key_pub_from_us = self.conn.recv(4096)
+        self.key_pub_usable = RSA.import_key(key_pub_from_us)
+
+    def echange_key(self):
+        self.key_aes = get_random_bytes(16)
+        self.iv_aes = get_random_bytes(16)
+        cipherrsa = PKCS1_OAEP.new(self.key_pub_usable)  # Preparer l'algorithme de chiffrement
+        key_aes_enc = cipherrsa.encrypt(self.key_aes)  # l'excuter en chiffrement
+        cipherrsa = PKCS1_OAEP.new(self.key_pub_usable)
+        iv_aes_enc = cipherrsa.encrypt(self.iv_aes)
+        self.conn.send(key_aes_enc)
+        self.conn.send(iv_aes_enc)
+
+    def send_encrypt_msg(self, text_to_encrypt):
+        if type(text_to_encrypt) == str:
+            text_to_encrypt = text_to_encrypt.encode("utf-8")
+        mode_aes = AES.MODE_CFB
+        cipheraes = AES.new(self.key_aes, mode_aes, iv=self.iv_aes)  # Pareil que RSA
+        text_enc = cipheraes.encrypt(text_to_encrypt)
+        print('text en AES', text_enc)
+        self.conn.send(text_enc)
+
+    def recv_chiff_aes(self):
+        mode_aes = AES.MODE_CFB
+        text_enc = self.conn.recv(2048)
+        cipher_aes = AES.new(self.key_aes, mode_aes, iv=self.iv_aes)  # Pareil que RSA
+        text = cipher_aes.decrypt(text_enc)
+        print("le texte reçu est :", text.decode("utf-8", errors="replace"))
 
     # Close the connection
     def quit(self):
