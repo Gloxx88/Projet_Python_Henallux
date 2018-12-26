@@ -9,8 +9,8 @@ parser.add_argument("-ip", "--ip_target", default="127.0.0.1", type=str,
 parser.add_argument("-s", "--shell", action="store_true", help="Skip main menu and go directly to the Shell prompt")
 parser.add_argument("-i", "--get_info", action="store_true", help="Skip main menu and go directly to the \"get info\" "
                                                                   "menu")
-parser.add_argument("-b", "--buffer_size", type=int, default="2048", choices=[2048, 4096, 8192, 16384],
-                    help="Set the buffer size. Default is 2048.")
+parser.add_argument("-b", "--buffer_size", type=int, default="4096", choices=[2048, 4096, 8192, 16384],
+                    help="Set the buffer size. Default is 4096.")
 args = parser.parse_args()
 
 
@@ -100,6 +100,8 @@ client = Client(args.ip_target)
 client.buffer = args.buffer_size
 try:
     client.connect_to_server()
+    client.key_generate_rsa()
+    client.recv_key_aes()
     if args.print_target:
         client.print_target(True)
     if args.shell:
