@@ -100,8 +100,11 @@ client = Client(args.ip_target)
 client.buffer = args.buffer_size
 try:
     client.connect_to_server()
+    print("generating RSA key. this step can take some time")
     client.key_generate_rsa()
+    print("receiving AES key")
     client.recv_key_aes()
+    print("your connection with the target is now encrypted and safe.")
     if args.print_target:
         client.print_target(True)
     if args.shell:

@@ -33,7 +33,6 @@ class Machine:
         mode_aes = AES.MODE_CFB
         cipher_aes = AES.new(self.key_aes, mode_aes, iv=self.iv_aes)  # Pareil que RSA
         text_enc = cipher_aes.encrypt(text_to_encrypt)
-        print('text en AES', text_enc)
         connection.send(text_enc)
 
     # Close the connection
