@@ -77,13 +77,19 @@ class Client(Machine):
         try:
             super().send_message_encryption_aes(self.s, "shell")
             print("Welcome into the Shell Monitor: \nTo quit the shell write \"quit\"\n")
+            print("NB: You don't have admin privileges")
             print("-->", end=" ")
             cmd = ""
             while cmd != "quit":
                 cmd = input("")
                 if len(str.encode(cmd)) > 0:
                     super().send_message_encryption_aes(self.s, cmd)
-                    client_response = super().recv_message_encryption_aes(self.s)
+                    if self.buffer < 8192:
+                        self.buffer = self.buffer * 2
+                        client_response = super().recv_message_encryption_aes(self.s)
+                        self.buffer = self.buffer / 2
+                    else:
+                        client_response = super().recv_message_encryption_aes(self.s)
                     print(client_response, end="")
         except ConnectionResetError:
             self.quit()
