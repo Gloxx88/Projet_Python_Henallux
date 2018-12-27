@@ -281,6 +281,8 @@ class Target(Machine):
                                                 + self.information[0] + "\n\tPort " + str(self.information[1]))
             self.conn.close()
             super().quit()
+            if self.print:
+                print("The connexion is closed")
         except socket.error as msg:
             if self.print:
                 print("the socket fail to close : " + str(msg))

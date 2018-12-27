@@ -6,9 +6,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--print_target", action="store_true", help="Show on Target's screen what are doing")
 parser.add_argument("-ip", "--ip_target", default="127.0.0.1", type=str,
                     help="define de target's ip, Default is 127.0.0.1 (localhost)")
-parser.add_argument("-s", "--shell", action="store_true", help="Skip main menu and go directly to the Shell prompt")
-parser.add_argument("-i", "--get_info", action="store_true", help="Skip main menu and go directly to the \"get info\" "
-                                                                  "menu")
+parser.add_argument("-s", "--shell", action="store_true", default=False, help="Skip main menu and go directly to the "
+                                                                              "Shell prompt. Can not be combined with "
+                                                                              "\"-i\"")
+parser.add_argument("-i", "--get_info", action="store_true", default=False, help="Skip main menu and go directly to the"
+                                                                                 " menu \"get info\" Can not be "
+                                                                                 "combined with \"-p\"")
 parser.add_argument("-b", "--buffer_size", type=int, default="4096", choices=[2048, 4096, 8192, 16384],
                     help="Set the buffer size. Default is 4096.")
 args = parser.parse_args()
@@ -107,10 +110,12 @@ try:
     print("your connection with the target is now encrypted and safe.")
     if args.print_target:
         client.print_target(True)
-    if args.shell:
+    if args.shell and not args.get_info:
         client.reverse_shell_send_command()
-    if args.get_info:
+    if args.get_info and not args.shell:
         menu_getinfo()
+    if args.get_info and args.shell:
+        print("you want to go to the shell prompt and to the info menu ? you cannot do both, you have to choice.")
     menu()
     if client.connection_active:
         client.quit()
