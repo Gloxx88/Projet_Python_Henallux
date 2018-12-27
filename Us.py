@@ -19,9 +19,9 @@ args = parser.parse_args()
 
 def menu():
     while client.connection_active:
-        print("\t\t============\n\t\t\tMENU\n\t\t============")
-        print("Welcome, what's your choice?\n1. Reverse Shell \n2. Get info \n3. Settings\n4. Quit")
-        choice = input("> ")
+        print("\n" + 66*"=" + "\n" + 30*"=" + " MENU " + 30*"=" + "\n" + 66*"=" + "\n")
+        print("\tWelcome, what's your choice?\n\t\t1. Reverse Shell \n\t\t2. Get info \n\t\t3. Settings\n\t\t4. Quit")
+        choice = input("\t> ")
 
         if choice == "1" or choice == "shell" or choice == "Shell":
             client.reverse_shell_send_command()
@@ -34,8 +34,8 @@ def menu():
 
 
 def menu_getinfo():
-    print("\t\t============\n\t\t\tMENU\n\t\t  Get Info\n\t\t============")
-    print("1. Global information\n2. Network information\n3. list user\n4. Quit")
+    print(30*"=" + " MENU " + 29*"=" + "\n" + 26*"=" + " INFORMATION " + 26*"=" + "\n")
+    print("\t1. Global information\n\t2. Network information\n\t3. list user\n\t4. Quit")
     choice = input("> ")
 
     if choice == "1":
@@ -47,11 +47,11 @@ def menu_getinfo():
 
 
 def menu_settings():
-    print("\t\t============\n\t\t\tMENU\n\tSettings\n\t\t============")
-    print("Settings: ")
-    print("1. Print on target's screen\n"
-          "2. Target's buffer size\n"
-          "3. Quit \n")
+    print(30*"=" + " MENU " + 30*"=" + "\n" + 28*"=" + " SETTINGS " + 28*"=")
+    print("\tSettings: ")
+    print("\t\t1. Print on target's screen\n"
+          "\t\t2. Target's buffer size\n"
+          "\t\t3. Quit \n")
     choice = input("> ")
 
     if choice == "1":
@@ -61,10 +61,10 @@ def menu_settings():
 
 
 def menu_print_on_target():
-    print("\t\t============\n\t\t\tMENU\n\tPrint on Target Screen\n\t\t============")
-    print("1. Print on Target screen")
-    print("2. I DON'T want to")
-    print("3. Don't change and go back")
+    print(30*"=" + " MENU " + 30*"=" + "\n" + 29*"=" + " PRINT " + 29*"=")
+    print("\t1. Print")
+    print("\t2. Don't Print")
+    print("\t3. Quit")
     choice = input(">")
 
     if choice == "1":
@@ -74,8 +74,9 @@ def menu_print_on_target():
 
 
 def menu_buffer():
-    print("which size would you want: ")
-    print("1. 2048\n2. 4096\n3. 8192\n4. 16384\n5. What's buffer size ?\n6. quit")
+    print(30*"=" + " MENU " + 30*"=" + "\n" + 29*"=" + " BUFFER " + 29*"=")
+    print("\twhich size would you want: ")
+    print("\t\t1. 2048\n\t\t2. 4096\n\t\t3. 8192\n\t\t4. 16384\n\t\t5. What does buffer size mean ?\n\t\t6. quit")
     size_buffer = input("> ")
     if size_buffer == "1":
         client.buffer = 2048
@@ -96,6 +97,7 @@ def menu_buffer():
               "physique utilisée pour stocker temporairement des données le temps qu'elles soient traitées comme "
               "lorsqu’elles sont déplacées d’un endroit à un autre.")
         print("\nSource: https://en.wikipedia.org/wiki/Data_buffer\n")
+        input("Press ENTER")
         menu_buffer()
 
 
