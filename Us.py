@@ -35,8 +35,8 @@ def menu():
 
 def menu_getinfo():
     print(30*"=" + " MENU " + 29*"=" + "\n" + 26*"=" + " INFORMATION " + 26*"=" + "\n")
-    print("\t1. Global information\n\t2. Network information\n\t3. list user\n\t4. Quit")
-    choice = input("> ")
+    print("\t\t1. Global information\n\t\t2. Network information\n\t\t3. list user\n\t\t4. Quit")
+    choice = input("\t> ")
 
     if choice == "1":
         client.getinfo("getinfo_generality")
@@ -52,7 +52,7 @@ def menu_settings():
     print("\t\t1. Print on target's screen\n"
           "\t\t2. Target's buffer size\n"
           "\t\t3. Quit \n")
-    choice = input("> ")
+    choice = input("\t> ")
 
     if choice == "1":
         menu_print_on_target()
@@ -62,10 +62,10 @@ def menu_settings():
 
 def menu_print_on_target():
     print(30*"=" + " MENU " + 30*"=" + "\n" + 29*"=" + " PRINT " + 29*"=")
-    print("\t1. Print")
-    print("\t2. Don't Print")
-    print("\t3. Quit")
-    choice = input(">")
+    print("\t\t1. Print")
+    print("\t\t2. Don't Print")
+    print("\t\t3. Quit")
+    choice = input("\t>")
 
     if choice == "1":
         client.print_target(True)
@@ -77,7 +77,7 @@ def menu_buffer():
     print(30*"=" + " MENU " + 30*"=" + "\n" + 29*"=" + " BUFFER " + 29*"=")
     print("\twhich size would you want: ")
     print("\t\t1. 2048\n\t\t2. 4096\n\t\t3. 8192\n\t\t4. 16384\n\t\t5. What does buffer size mean ?\n\t\t6. quit")
-    size_buffer = input("> ")
+    size_buffer = input("\t> ")
     if size_buffer == "1":
         client.buffer = 2048
         client.set_target_buffer(2048)

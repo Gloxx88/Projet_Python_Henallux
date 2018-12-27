@@ -160,28 +160,20 @@ class Target(Machine):
 
     # bind de socket with the port
     def socket_bind(self):
-        if self.print:
-            print("Binding socket to port " + str(self.port))
         try:
             self.s.bind((self.host, self.port))
             self.s.listen(5)
-        except socket.error as msg:
-            if self.print:
-                print("Socket binding error: " + str(msg))
+        except socket.error:
+            self.quit()
 
     # accept the new co
     def socket_accept(self):
         self.conn, self.information = self.s.accept()
-        if self.print:
-            print("Connexion has been establish | " + "IP " + self.information[0] + " | Port : " +
-                  str(self.information[1]))
 
     # Receive the RSA key that client generate
     def recv_key_rsa(self):
         key_pub_from_us = self.conn.recv(self.buffer)
         self.key_pub_usable = RSA.import_key(key_pub_from_us)
-        if self.print:
-            print("RSA key received")
 
     # generate an AES key and send it to client
     def send_key_aes(self):
