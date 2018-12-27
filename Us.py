@@ -117,5 +117,9 @@ try:
 except ConnectionRefusedError as msg:
     print("Error: " + str(msg))
     print("The programme on target is not running.")
+except TimeoutError as msg:
+    print("Error :" + str(msg))
+    print("Restart the program and verify the ip")
+
 
 
